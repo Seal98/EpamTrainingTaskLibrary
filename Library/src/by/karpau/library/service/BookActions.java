@@ -5,6 +5,9 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,8 +18,8 @@ import java.util.StringTokenizer;
 import by.karpau.library.entity.Book;
 
 public class BookActions {
-	public static List<Book> readBooksFromFile() throws IOException, ParseException {
-		BufferedReader br = new BufferedReader(new FileReader("input.txt"));
+	public static List<Book> readBooksFromFile(String wayToFile) throws IOException, ParseException {
+		BufferedReader br = new BufferedReader(new FileReader(wayToFile));
 
 		List<Book> listOfBooks = new ArrayList<>();
 		String strFromFile;
@@ -35,8 +38,23 @@ public class BookActions {
 		return listOfBooks;
 	}
 
-	public static void writeBooksIntoFile(List<Book> listOfBooks) throws IOException {
-		BufferedWriter bw = new BufferedWriter(new FileWriter("output.txt"));
+	public static List<Book> readBooksFromDB(PreparedStatement loadStmt) throws IOException, ParseException, SQLException {
+		List<Book> listOfBooks = new ArrayList<>();
+		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+	    ResultSet result = loadStmt.executeQuery();
+		while (result.next()) {
+			String bookName = result.getString("bookname");
+			String authorName = result.getString("authorname");
+			String bookGenre = result.getString("genre");
+			Date dateOfPublication = formatter.parse(result.getString("releasedate"));
+			int numberOfPages = Integer.parseInt(result.getString("numberofpages"));
+			listOfBooks.add(new Book(bookName, authorName, bookGenre, dateOfPublication, numberOfPages));
+		}
+		return listOfBooks;
+	}
+	
+	public static void writeBooksIntoFile(String wayToFile, List<Book> listOfBooks) throws IOException {
+		BufferedWriter bw = new BufferedWriter(new FileWriter(wayToFile));
 		for (Book book : listOfBooks) {
 			bw.write(book.toString());
 			bw.newLine();

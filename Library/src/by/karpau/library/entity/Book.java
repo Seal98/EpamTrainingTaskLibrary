@@ -89,10 +89,13 @@ public class Book {
 	}
 	
 	public boolean equals(Book book) {
+		if(book == null) {
+			return false;
+		}
 		if (this == book) {
 			return true;
 		}
-		if (book == null || book.getClass().getName() != this.getClass().getName()) {
+		if (book.getClass().getName() != this.getClass().getName()) {
 			return false;
 		}
 		if(bookName != book.bookName || authorName != book.authorName || bookGenre != book.bookGenre

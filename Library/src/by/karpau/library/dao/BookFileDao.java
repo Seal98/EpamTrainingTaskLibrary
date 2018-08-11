@@ -1,47 +1,42 @@
 package by.karpau.library.dao;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import bookCriterions.Criterion;
-import by.karpau.library.bookExceptions.BookExistException;
 import by.karpau.library.bookExceptions.BookNotExistException;
 import by.karpau.library.bookExceptions.BookWrongArgumentException;
 import by.karpau.library.entity.Book;
+import by.karpau.library.service.BookActions;
 
-public class BookListDao implements BookDao, Comparator<Date> {
+public class BookFileDao implements BookDao, Comparator<Date> {
 
-	private List<Book> listOfBooks;
+	private String wayToFile;
 
-	public BookListDao() {
-		listOfBooks = new ArrayList<Book>();
+	public BookFileDao() {}
+	
+	public BookFileDao(String way) {
+		wayToFile = way;
 	}
 
-	public BookListDao(List<Book> listOfBooks) {
-		this.listOfBooks = listOfBooks;
-	}
-
-	public List<Book> getListOfBooks() {
-		List<Book> copyOfBookList = new ArrayList<>();
-		for (Book book : listOfBooks) {
-			copyOfBookList.add(book.getBookCopy());
-		}
+	public List<Book> getListOfBooks() throws IOException, ParseException {
+		List<Book> copyOfBookList = BookActions.readBooksFromFile(wayToFile);
 		return copyOfBookList;
 	}
 
-	public void addBook(Book newBook) throws BookExistException {
-		if (getIndexOfExistingBook(newBook) == -1) {
-			listOfBooks.add(newBook);
-		} else {
-			throw new BookExistException();
-		}
+	public void addBook(Book newBook) throws IOException, ParseException{
+		List<Book> listOfBooks = BookActions.readBooksFromFile(wayToFile);
+		listOfBooks.add(newBook);
+		BookActions.writeBooksIntoFile(wayToFile, listOfBooks);
 	}
 
-	private int getIndexOfExistingBook(Book bookForCheck) {
+	private int getIndexOfExistingBook(Book bookForCheck) throws IOException, ParseException {
 		int index = 0;
+		List<Book> listOfBooks = BookActions.readBooksFromFile(wayToFile);
 		for (Book book : listOfBooks) {
 			if (bookForCheck.equals(book)) {
 				return index;
@@ -51,17 +46,20 @@ public class BookListDao implements BookDao, Comparator<Date> {
 		return -1;
 	}
 
-	public void removeBook(Book existBook) throws BookNotExistException {
+	public void removeBook(Book existBook) throws BookNotExistException, IOException, ParseException {
 		int index;
+		List<Book> listOfBooks = BookActions.readBooksFromFile(wayToFile);
 		if ((index = getIndexOfExistingBook(existBook)) != -1) {
 			listOfBooks.remove(index);
+			BookActions.writeBooksIntoFile(wayToFile, listOfBooks);
 		} else {
 			throw new BookNotExistException();
 		}
 	}
-
-	public List<Book> findByTag(Criterion criterion) throws BookWrongArgumentException {
-		List<Book> listOfBooks = getListOfBooks();
+	
+	
+	public List<Book> findByTag(Criterion criterion) throws BookWrongArgumentException, IOException, ParseException {
+		List<Book> listOfBooks = BookActions.readBooksFromFile(wayToFile);
 		int[] arrayForRemovingBooks = new int[listOfBooks.size()];
 		for (int i = 0; i < listOfBooks.size(); i++) {
 			if (!criterion.compareCriterions(listOfBooks.get(i))) {
@@ -73,6 +71,7 @@ public class BookListDao implements BookDao, Comparator<Date> {
 				listOfBooks.remove(i);
 			}
 		}
+		BookActions.writeBooksIntoFile("booksFoundByTag.txt", listOfBooks);
 		return listOfBooks;
 	}
 
@@ -83,9 +82,11 @@ public class BookListDao implements BookDao, Comparator<Date> {
 	 *            1 - sort by bookName 2 - sort by authorName 3 - sort by bookGenre
 	 *            4 - sort by dateOfPublication 5 - sort by numberOfPages
 	 * @throws BookWrongArgumentException 
+	 * @throws ParseException 
+	 * @throws IOException 
 	 */
-	public List<Book> sortBooksByTag(Criterion criterion) throws BookWrongArgumentException {
-		List<Book> listOfBooks = getListOfBooks();
+	public List<Book> sortBooksByTag(Criterion criterion) throws BookWrongArgumentException, IOException, ParseException {
+		List<Book> listOfBooks = BookActions.readBooksFromFile(wayToFile);
 		for (int i = 0; i < listOfBooks.size() - 1; i++) {
 			for (int j = i + 1; j < listOfBooks.size(); j++) {
 					if (criterion.compareForSort(listOfBooks.get(i), listOfBooks.get(j))) {
@@ -95,7 +96,7 @@ public class BookListDao implements BookDao, Comparator<Date> {
 					}
 			}
 		}
-
+		BookActions.writeBooksIntoFile("sortedBooks.txt", listOfBooks);
 		return listOfBooks;
 	}
 	
