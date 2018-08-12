@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 
-import bookCriterions.Criterion;
+import by.karpau.library.bookCriterions.Criterion;
 import by.karpau.library.bookExceptions.BookExistException;
 import by.karpau.library.bookExceptions.BookNotExistException;
 import by.karpau.library.bookExceptions.BookWrongArgumentException;

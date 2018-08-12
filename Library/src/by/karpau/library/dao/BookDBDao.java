@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import bookCriterions.Criterion;
+import by.karpau.library.bookCriterions.Criterion;
 import by.karpau.library.bookExceptions.BookNotExistException;
 import by.karpau.library.bookExceptions.BookWrongArgumentException;
 import by.karpau.library.entity.Book;
